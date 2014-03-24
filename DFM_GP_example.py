@@ -14,7 +14,7 @@ https://speakerdeck.com/dfm/an-astronomers-introduction-to-gaussian-processes
 
 from matplotlib import rcParams
 rcParams["savefig.dpi"] = 150
-
+import prettyplotlib as ppl
 import emcee  # http://dan.iel.fm/emcee
 import triangle  # https://github.com/dfm/triangle.py
 import numpy as np
@@ -53,12 +53,9 @@ plt.savefig("figures/yerr.pdf");
 Plot II: #Make an image of the noise
 '''
 #Visualize the covariance
-fig = plt.figure(figsize=(8, 8))
-fig.subplots_adjust(left=0.11, right=0.95, wspace=0.3, bottom=0.17, top=0.9)
-ax = fig.add_subplot(111)
- 
-ax.imshow(true_cov, interpolation="nearest", cmap="gray")
-plt.savefig("figures/line-cov.pdf");
+fig, ax = plt.subplots(1)
+ppl.pcolormesh(fig, ax, true_cov)
+fig.savefig('figures/pplLineCov.png')
 #plt.show()
 
 
