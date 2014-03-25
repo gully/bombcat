@@ -122,12 +122,22 @@ plt.savefig("figures/leastSqParDist.pdf")
 plt.close()
 
 '''
-Plot the least squares solution as a 
+Plot the least squares solution as an oband
 '''
+fig = plt.figure(figsize=(6, 6))
+fig.subplots_adjust(left=0.11, right=0.95, wspace=0.3, bottom=0.17, top=0.9)
+ax = fig.add_subplot(111)
 
+samples = np.dot(np.vander(x0, 2), rand_params.T)
+ls_mu = np.mean(samples, axis=1)
+ls_std = np.std(samples, axis=1)
 
-#samples = np.dot(np.vander(x0, 2), .T)
-#ls_mu = np.mean(samples, axis=1)
-#ls_std = np.std(samples, axis=1)
+ax.errorbar(x, y, yerr=yerr, fmt=".k", capsize=0)
+ax.plot(x0, true_m * x0 + true_b, "k", lw=2, alpha=0.8);
+ax.fill_between(x0, ls_mu+ls_std, ls_mu-ls_std, color="r", alpha=0.3)
+ax.set_ylim(-4, 4)
+plt.savefig("figures/line-ls.pdf");
+plt.close()
+
 
 print 1
