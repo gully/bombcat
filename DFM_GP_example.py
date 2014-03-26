@@ -236,13 +236,44 @@ def lnprior(m, b, lna, lns):
         return -np.inf
     return 0.0
 
-#I'm honestly not sure the point of this function... what are these *p's?
-#This basically just adds zero (prior) to the likelihood, or is -inf
+#What are these *p's?
+#This basically just adds zero (prior) to the likelihood, or is -inf otherwise
+#For a more complex prior, this does the job of doing Bayes' rule
+#Though a uniform window funtion is still a prior, so yes, this is Bayes' rule.
+#The ouput of this is the posterior!
 def lnprob(p):
     lp = lnprior(*p)
     if not np.isfinite(lp):
         return -np.inf
     return lp + lnlike(*p)
 
+#Time for emcee!!!
+#First, just initialize everything
+ndim, nwalkers = 4, 32
+p0 = np.array([true_m, true_b, np.log(0.5), np.log(1.3)]) #WTF this is cheating!!
+pos = [p0 + 1e-2 * np.random.randn(ndim) for i in range(nwalkers)]
+
+#Then, set up a burn in...
+#I know why there are burn in's but not sure how this implement it
+sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
+pos, lp, state = sampler.run_mcmc(pos, 300)
+
+#What does reseting the sampler do??
+sampler.reset()
+pos, lp, state = sampler.run_mcmc(pos, 5000)
+chain = sampler.chain
+
+
+fig, axes = plt.subplots(4, 1, figsize=(5, 6), sharex=True)
+fig.subplots_adjust(left=0.1, bottom=0.1, right=0.96, top=0.98,
+                    wspace=0.0, hspace=0.05)
+[a.plot(np.arange(chain.shape[1]), chain[:, :, i].T, "k", alpha=0.5)
+ for i, a in enumerate(axes)]
+[a.set_ylabel("${0}$".format(l)) for a, l in zip(axes, ["m", "b", "\ln a", "\ln s"])]
+axes[-1].set_xlim(0, chain.shape[1])
+axes[-1].set_xlabel("iteration");
+
+fig = triangle.corner(sampler.flatchain[::13], labels=map("${0}$".format, ["m", "b", "\ln a", "\ln s"]))
+fig.savefig("figures/line-corner.pdf");
 
 print 1
