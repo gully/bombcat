@@ -24,6 +24,7 @@ from astroML.plotting import setup_text_plots
 setup_text_plots(fontsize=16, usetex=False)
 from astroML.stats.random import bivariate_normal
 from matplotlib.patches import Ellipse
+import timeit
 #from IPython.display import display, Math, Latex
 
 #np.random.seed(123456)
@@ -262,6 +263,7 @@ pos, lp, state = sampler.run_mcmc(pos, 300)
 sampler.reset()
 pos, lp, state = sampler.run_mcmc(pos, 5000)
 chain = sampler.chain
+
 
 
 fig, axes = plt.subplots(4, 1, figsize=(5, 6), sharex=True)
