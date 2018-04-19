@@ -5,7 +5,7 @@ import argparse
 import torch
 
 parser = argparse.ArgumentParser(prog="least_sqaures_gpu.py", description="Demo of fitting a line with least squares with pytorch.")
-parser.add_argument("--Nsamples", type=int, default=5000)
+parser.add_argument("--Nsamples", type=int, default=500)
 parser.add_argument("--CUDA", action="store_true")
 args = parser.parse_args()
 
@@ -31,10 +31,7 @@ yerr_hom = 0.4*torch.ones(N).type(dtype)
 hom_cov = torch.diag(yerr_hom ** 2).type(dtype)
 iid_cov = torch.diag(yerr ** 2).type(dtype)
 true_cov = 0.5 * torch.exp(-0.5 * (x[:, None]-x[None, :])**2 / 1.3**2) + torch.diag(yerr ** 2)
-#y = np.random.multivariate_normal(y, true_cov)
-#np.save('y_fake.npy', y)
-y = np.load('y_fake.npy')
-y_pt = torch.from_numpy(y).type(dtype)
+y_noised = torch.distributions.multivariate_normal.MultivariateNormal(y, covariance_matrix=true_cov).sample()
 
 
 #Linear algebra
@@ -42,14 +39,14 @@ A = torch.ones((N,2))
 A[:, 0] = x
 
 AT= A.t()
-C = iid_cov
+C = true_cov
 
 t0 = time.time()
-C_inv = torch.inverse(C)
-S_inv = torch.matmul(torch.matmul(A.t(), C_inv), A)
-S = torch.inverse(S_inv)
-ls_m, ls_b = torch.matmul(torch.matmul( torch.matmul(S, AT), C_inv), y_pt)
+factor = torch.potrf(C)
+S_inv = torch.mm(AT, torch.potrs(A, factor))
+S = torch.inverse(S_inv) #only a 2 x 2, so it's cheap.
+ls_m, ls_b = torch.mm(S, torch.mm(AT, torch.potrs(y_noised, factor)))
 t1 = time.time()
 
 net_time = t1-t0
-print(" m: {:.2f} \n b: {:.2f} \n time: {}".format(ls_m, ls_b, net_time))
+print(" m: {:.2f} \n b: {:.2f} \n time: {}".format(ls_m[0], ls_b[0], net_time))
