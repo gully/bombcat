@@ -35,7 +35,7 @@ y_noised = torch.distributions.multivariate_normal.MultivariateNormal(y, covaria
 
 
 #Linear algebra
-A = torch.ones((N,2))
+A = torch.ones((N,2)).type(dtype)
 A[:, 0] = x
 
 AT= A.t()
