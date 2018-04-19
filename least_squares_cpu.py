@@ -2,6 +2,7 @@
 import numpy as np
 import time
 import argparse
+from scipy.linalg import cho_factor, cho_solve
 
 parser = argparse.ArgumentParser(prog="least_sqaures_cpu.py", description="Demo of fitting a line with least squares.")
 parser.add_argument("--Nsamples", type=int, default=5000)
@@ -32,10 +33,13 @@ AT= A.T
 C = iid_cov
 
 t0 = time.time()
-C_inv = np.linalg.inv(C)
-S_inv = np.dot( np.dot(AT, C_inv), A)
-S= np.linalg.inv(S_inv)
-ls_m, ls_b = np.dot(np.dot( np.dot(S, A.T), C_inv), y)
+# C_inv = np.linalg.inv(C)
+# S_inv = np.dot( np.dot(AT, C_inv), A)
+# S= np.linalg.inv(S_inv)
+# ls_m, ls_b = np.dot(np.dot( np.dot(S, A.T), C_inv), y)
+factor = cho_factor(C, overwrite_a=True)
+S_inv = np.dot(AT, cho_solve(factor, A))
+ls_m, ls_b = np.linalg.solve(S_inv, np.dot(A.T, cho_solve(factor, y)))
 t1 = time.time()
 
 net_time = t1-t0
