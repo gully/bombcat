@@ -45,7 +45,7 @@ t0 = time.time()
 factor = torch.potrf(C)
 S_inv = torch.mm(AT, torch.potrs(A, factor))
 S = torch.inverse(S_inv) #only a 2 x 2, so it's cheap.
-ls_m, ls_b = torch.mm(S, torch.mm(AT, torch.potrs(y_noised, factor)))
+ls_m, ls_b = torch.dot(S, torch.mm(AT, torch.potrs(y_noised, factor)))
 t1 = time.time()
 
 net_time = t1-t0
